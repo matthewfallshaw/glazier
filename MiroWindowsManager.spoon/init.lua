@@ -1,6 +1,6 @@
 -- Copyright (c) 2018 Miro Mannino
--- Permission is hereby granted, free of charge, to any person obtaining a copy of this 
--- software and associated documentation files (the "Software"), to deal in the Software 
+-- Permission is hereby granted, free of charge, to any person obtaining a copy of this
+-- software and associated documentation files (the "Software"), to deal in the Software
 -- without restriction, including without limitation the rights to use, copy, modify, merge,
 -- publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons
 -- to whom the Software is furnished to do so, subject to the following conditions:
@@ -8,19 +8,19 @@
 -- The above copyright notice and this permission notice shall be included in all copies
 -- or substantial portions of the Software.
 --
--- THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, 
--- INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR 
+-- THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+-- INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
 -- PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
--- FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR 
--- OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
+-- FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+-- OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 -- DEALINGS IN THE SOFTWARE.
 
 --- === MiroWindowsManager ===
 ---
---- With this Spoon you will be able to move the window in halves and in corners using your keyboard and mainly using arrows. You would also be able to resize them by thirds, quarters, or halves.  
+--- With this Spoon you will be able to move the window in halves and in corners using your keyboard and mainly using arrows. You would also be able to resize them by thirds, quarters, or halves.
 --- Official homepage for more info and documentation:
 --- [https://github.com/miromannino/miro-windows-manager](https://github.com/miromannino/miro-windows-manager)
---- 
+---
 --- NOTE: This Spoon sets `hs.grid` globals with `hs.grid.setGrid()`, `hs.grid.MARGINX`, and `hs.grid.MARGINY`.
 --- Changing MiroWindowsManager.GRID will change these globals.
 ---
@@ -44,6 +44,11 @@ obj.license = "MIT - https://opensource.org/licenses/MIT"
 
 local logger = hs.logger.new(obj.name)
 obj._logger = logger  -- make logger available so users can turn up the volume!
+
+-- DEBUG
+logger.setLogLevel('verbose')
+-- / DEBUG
+
 logger.i("Loading ".. obj.name)
 
 
@@ -51,17 +56,17 @@ logger.i("Loading ".. obj.name)
 
 --- MiroWindowsManager.sizes
 --- Variable
---- The sizes that the window can have.  
---- The sizes are expressed as dividend of the entire screen's size.  
---- For example `{2, 3, 3/2}` means that it can be 1/2, 1/3 and 2/3 of the total screen's size.  
+--- The sizes that the window can have.
+--- The sizes are expressed as dividend of the entire screen's size.
+--- For example `{2, 3, 3/2}` means that it can be 1/2, 1/3 and 2/3 of the total screen's size.
 --- Make sure that these numbers divide both dimensions of MiroWindowsManager.GRID to give integers.
 obj.sizes = {2, 3, 3/2}
 
 --- MiroWindowsManager.fullScreenSizes
 --- Variable
---- The sizes that the window can have in full-screen.  
---- The sizes are expressed as dividend of the entire screen's size.  
---- For example `{1, 4/3, 2}` means that it can be 1/1 (hence full screen), 3/4 and 1/2 of the total screen's size.  
+--- The sizes that the window can have in full-screen.
+--- The sizes are expressed as dividend of the entire screen's size.
+--- For example `{1, 4/3, 2}` means that it can be 1/1 (hence full screen), 3/4 and 1/2 of the total screen's size.
 --- Make sure that these numbers divide both dimensions of MiroWindowsManager.GRID to give integers.
 --- Use 'c' for the original size and shape of the window before starting to move it.
 obj.fullScreenSizes = {1, 2, 'c'}
@@ -73,7 +78,7 @@ require('extend_GRID').extend(obj, logger)
 
 --- MiroWindowsManager.GRID
 --- Variable
---- The screen's grid size.  
+--- The screen's grid size.
 --- Make sure that the numbers in MiroWindowsManager.sizes and MiroWindowsManager.fullScreenSizes divide h and w to give integers.
 obj.GRID = { w = 24, h = 24, margins = hs.geometry.point(0,0) }
 function obj.GRID.cell()
@@ -166,7 +171,7 @@ end
 
 --- MiroWindowsManager:move(side)
 --- Method
---- Move the frontmost window up, down, left, right.  
+--- Move the frontmost window up, down, left, right.
 ---
 --- Parameters:
 ---  * side - 'up', 'down', 'left', or 'right'
@@ -198,6 +203,19 @@ function obj:resize(growth)
 
   local w = frontmostWindow()
   local fr = w:frame()
+  local screen_fr = frontmostScreen():frame()
+  -- DEBUG
+  local dd = {
+    Screen = screen_fr,
+    Window = fr,
+    BoundUp = self:currentlyBound('up'),
+    BoundDown = self:currentlyBound('down'),
+    BoundLeft = self:currentlyBound('left'),
+    BoundRight = self:currentlyBound('right'),
+  }
+  local fun = require 'fun'
+  logger.d(table.concat(fun.map(dd,function(k,v) return i(k)..': '..i(v) end),"\n  "))
+  -- /DEBUG
 
   local growthDiff = fr[self._growthsRel[growth].dim] * (self.resizeRate - 1)
   fr[self._growthsRel[growth].pos] =
@@ -205,7 +223,7 @@ function obj:resize(growth)
   fr[self._growthsRel[growth].dim] =
     fr[self._growthsRel[growth].dim] + (self._growthsRel[growth].growthSign * growthDiff)
 
-  fr = fr:intersect(frontmostScreen():frame())  -- avoid sizing out of bounds
+  fr = fr:intersect(screen_fr)  -- avoid sizing out of bounds
 
   if self.stickySides then
     if growth == 'shorter' and self:currentlyBound('up') then
@@ -245,8 +263,8 @@ end
 
 --- MiroWindowsManager:go(move)
 --- Method
---- Move to screen edge, or cycle to next horizontal or vertical size if already there.  
---- Tap both directions to go full width / height.  
+--- Move to screen edge, or cycle to next horizontal or vertical size if already there.
+--- Tap both directions to go full width / height.
 ---
 --- Parameters:
 ---  * move - 'up', 'down', 'left', or 'right'
@@ -481,7 +499,7 @@ obj.hotkeys = {}
 ---   * down: for the down action (usually `{hyper, "down"}`)
 ---   * fullscreen: for the full-screen action (e.g. `{hyper, "f"}`)
 ---   * center: for the center action (e.g. `{hyper, "c"}`)
----   * move: for the move action (e.g. `{hyper, "v"}`). The move action is active as soon as the hotkey is pressed. While active the left, right, up or down keys can be used (these are configured by the actions above). 
+---   * move: for the move action (e.g. `{hyper, "v"}`). The move action is active as soon as the hotkey is pressed. While active the left, right, up or down keys can be used (these are configured by the actions above).
 ---   * resize: for the resize action (e.g. `{hyper, "d"}`). The resize action is active as soon as the hotkey is pressed. While active the left, right, up or down keys can be used (these are configured by the actions above).
 ---
 --- A configuration example:
@@ -509,7 +527,7 @@ function obj:bindHotkeys(mapping)
 
   -- movingKeys
   for _,direction in ipairs(self._directions) do
-    -- save the keys that the user decided to be for directions, 
+    -- save the keys that the user decided to be for directions,
     -- generally the arrows keys, but it could be also WASD.
     self._movingKeys[direction] = mapping[direction][2]
   end
