@@ -1,17 +1,13 @@
-# Miro's windows manager
+# MiroWindowsManager
 
-With this Hammerspoon Spoon you will be able to move windows in halves and in corners using your keyboard, mainly using arrows. You will also be able to resize them by thirds, quarters, or halves.
+A [Hammerspoon](https://www.hammerspoon.org) Spoon for arranging macOS windows from the keyboard: send a window to an edge or corner of the screen with the arrow keys, and repeat the key to cycle through sizes.
 
-Other projects (e.g. Spectacle) move windows in halves using arrows, and in corners using other counterintuitive shortcuts, like letters, which makes things confusing.
-
-This script needs Hammerspoon in order to work.
-
-![example](https://github.com/miromannino/miro-windows-manager/raw/imgs/example.gif)
+This is a fork of [miro-windows-manager](https://github.com/miromannino/miro-windows-manager) by Miro Mannino, who designed this way of arranging windows and wrote the original Spoon. This fork reimplements it and has different settings, so it isn't a drop-in replacement, and problems here are the fork's rather than Miro's.
 
 ## How to install
 
- - Extract the zip file, containing `MiroWindowsManager.spoon` in `~/.hammerspoon/Spoons`
- - Now you need to configure Hammerspoon in order to load this spoon in `~/.hammerspoon/Spoons/MiroWindowsManager.spoon` adding the following snippet of code in your `init.lua` file:
+Copy `MiroWindowsManager.spoon` to `~/.hammerspoon/Spoons`, then add this to your `init.lua`:
+
 ``` lua
 hs.loadSpoon("MiroWindowsManager")
 local hyper = {"ctrl", "alt", "cmd"}
@@ -20,93 +16,70 @@ spoon.MiroWindowsManager:bindHotkeys({
   down        = {hyper, "down"},
   left        = {hyper, "left"},
   right       = {hyper, "right"},
+  fullWidth   = {hyper, "left+right"},
+  fullHeight  = {hyper, "up+down"},
   fullscreen  = {hyper, "f"},
   center      = {hyper, "c"},
   move        = {hyper, "v"},
-  resize      = {hyper, "d" }
+  resize      = {hyper, "d"},
 })
 hs.window.animationDuration = 0.3
 ```
 
 ## Shortcuts
 
-In the snippet above configure Miro'w Windows Manager in the following way:
+With the snippet above, every shortcut starts with `hyper`: `ctrl` + `alt` + `cmd`.
 
-### Hyper key
+### Edges and sizes
 
- The hyper key is defined as `ctrl` + `alt` + `cmd`. This means that each shortcut will start by pressing these three keys. If you consider this too verbose for your personal keyboard interactions, you can also change it, for example replacing it with an unused modifier key (e.g. caps lock key with [Karabiner Elements](https://pqrs.org/osx/karabiner/)).
+`hyper` + an arrow moves the window to that edge of the screen. Repeating it cycles through `sizes`.
 
-### Move in halves
+### Corners
 
- - `hyper` + `up`: move to the top half of the screen
- - `hyper` + `right`: move to the right half of the screen
- - `hyper` + `down`: move to the bottom half of the screen
- - `hyper` + `left`: move to the left half of the screen
+Press two perpendicular arrows, such as `hyper` + `up` + `right`. Each axis cycles through sizes on its own.
 
-By repeating these shortcuts the window is resized to be one third or two thirds and again in one half. 
+### Full width or height
 
-### Move to corners
+ - `fullWidth`: `hyper` + `left` + `right`
+ - `fullHeight`: `hyper` + `up` + `down`
 
- - `hyper` + `up` + `right`: move the window to the top-right corner
- - `hyper` + `down` + `right`: move the window to the bottom-right corner
- - `hyper` + `up` + `left`: move the window to the top-left corner
- - `hyper` + `down` + `left`: move the window to the bottom-left corner
+The first key's own action runs when it's pressed, and completing the chord doesn't undo it. With these pairings the chord overwrites that action's effect, because both set the same axis. Pairing keys on different axes would keep it.
 
- When the window is in the corner, it will have one half of screen height and one half of screen width. 
- The arrows can be used to expand the height/width to be one third, two thirds or again one half. 
- For example if the window is in the top-right corner, pressing `hyper` + `up` the window height will be resized to be one third, while pressing `hyper` + `right` the window width will be resized to be one third; in this case `hyper` + `left` and `hyper` + `down` will move the window to the top-left and bottom-right corners, respectively.
+### Fullscreen
 
-### Expand to fit the entire height or width
+`hyper` + `f` cycles through `fullScreenSizes`. The `'c'` entry returns the window to where it was before it started cycling.
 
-These are useful in case the window is in one of the corners.
+### Center
 
- - `hyper` + `up` + `down`: expand the height to fit the entire screen height
- - `hyper` + `right` + `left`: expand the width to fit the entire screen width
+`hyper` + `c` centres the window without resizing it.
 
-### Expand to fullscreen
+### Move mode
 
- - `hyper` + `f`: expand to be full screen
+Hold `hyper` + `v` and tap an arrow to move the window by `moveStep` points.
 
-Note that in case the window is resized to be a half of the screen, you can also use `hyper` + `up` + `down` (or `hyper` + `right` + `left`) to resize the window full screen.
+### Resize mode
 
-As the other shortcuts, `hyper` + `f` can be pressed multiple times to obtain a centered window of three fourth and one half of height and width. This behaviour can be customized.
+Hold `hyper` + `d` and tap an arrow to resize the window by `resizeStep` points: `up` is taller, `down` is shorter, `left` is thinner and `right` is wider. An edge touching the side of the screen stays there.
 
-### Center window
+## Settings
 
- - `hyper` + `c`: center window without changing its size
+Set these on `spoon.MiroWindowsManager`:
 
-### Move Mode
+ - `sizes`: fractions of the screen to cycle through at an edge, such as `{1/2, 1/3, 2/3}`
+ - `fullScreenSizes`: fractions of the screen for the fullscreen cycle, such as `{1, 1/2, 'c'}`
+ - `moveStep`, `resizeStep`, `minSize`, `edgeTolerance`: in points
 
- - Press and hold `hyper` + `v`, then tap the move keys to move the window in increments of 5% of the screen size
+Windows that don't take the requested frame are logged as warnings in the Hammerspoon console.
 
-### Resize Mode
+The Spoon remembers each window's cycle position and pre-fullscreen frame across Hammerspoon restarts, for up to 64 recently used windows, in `hs.settings`.
 
- - Press and hold `hyper` + `d`, then tap the move keys to resize the window in increments of 5% of the screen size.
+## Tests
+
+Run `busted` from the repository root. Placement logic is in `core.lua` and tests without Hammerspoon. `controller.lua` tests against simulated windows.
 
 ## Animations
 
 The snippet above configures the animation to last `0.3s` with `hs.window.animationDuration = 0.3`. To remove the animations completely change this value to `0`.
-
-## Reviews
-
-Here comments from the users, just as reviews.
-
-> it's something I have been looking for all my life! It is really intuitive and ingenious once you see the magic it can do.
-> 
-> &mdash; [rxng](https://github.com/miromannino/hammerspoon-config/issues/1)
-
-> Really loving the arrow based positioning, thanks for making this ! I can now uninstall “spectacle” which I was using for the same purpose but the key bindings were unintuitive.
->
-> &mdash; Gaurav
-
-> the only issue I have with miro-windows-manager is the fact that I didn't discover it sooner. just getting into HammerSpoon and love this 🥄 ... so handy, nice work @miromannino !
->
-> &mdash; [zanuka](https://github.com/miromannino/miro-windows-manager/issues/13)
-
-## Articles
-
-A suggested tutorial on Mic Sumner: https://www.micsumner.com/how-to-organise-window-viewing-areas-in-mac-os/
-
 
 ## License (MIT)
 
