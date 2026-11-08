@@ -1,0 +1,23 @@
+# Attaches the zipped Spoon to each published release, so it can be installed by double-clicking.
+name: Release
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  attach-spoon:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Zip and attach the Spoon
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.event.release.tag_name }}
+        run: |
+          spoon=$(ls -d *.spoon)
+          zip -r "$spoon.zip" "$spoon"
+          gh release upload "$TAG" "$spoon.zip" --clobber

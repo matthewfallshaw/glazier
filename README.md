@@ -6,7 +6,7 @@ This is a fork of [miro-windows-manager](https://github.com/miromannino/miro-win
 
 ## How to install
 
-Copy `MiroWindowsManager.spoon` to `~/.hammerspoon/Spoons`, then add this to your `init.lua`:
+Download `MiroWindowsManager.spoon.zip` from the [latest release](https://github.com/matthewfallshaw/miro-windows-manager/releases/latest) and double-click it, or copy `MiroWindowsManager.spoon` from this repository to `~/.hammerspoon/Spoons`. Then add this to your `init.lua`:
 
 ``` lua
 hs.loadSpoon("MiroWindowsManager")
