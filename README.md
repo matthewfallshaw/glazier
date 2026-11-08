@@ -1,27 +1,29 @@
-# MiroWindowsManager
+# Glazier
 
 A [Hammerspoon](https://www.hammerspoon.org) Spoon for arranging macOS windows from the keyboard: send a window to an edge or corner of the screen with the arrow keys, and repeat the key to cycle through sizes.
 
-This is a fork of [miro-windows-manager](https://github.com/miromannino/miro-windows-manager) by Miro Mannino, who designed this way of arranging windows and wrote the original Spoon. This fork reimplements it and has different settings, so it isn't a drop-in replacement, and problems here are the fork's rather than Miro's.
+Glazier began as a fork of [miro-windows-manager](https://github.com/miromannino/miro-windows-manager) by Miro Mannino, who designed this way of arranging windows and wrote the original Spoon. Glazier reimplements it under a new name, with different settings, so it isn't a drop-in replacement, and problems here are Glazier's rather than Miro's.
 
 ## How to install
 
-Download `MiroWindowsManager.spoon.zip` from the [latest release](https://github.com/matthewfallshaw/miro-windows-manager/releases/latest) and double-click it, or copy `MiroWindowsManager.spoon` from this repository to `~/.hammerspoon/Spoons`. Then add this to your `init.lua`:
+Download `Glazier.spoon.zip` from the [latest release](https://github.com/matthewfallshaw/miro-windows-manager/releases/latest) and double-click it, or copy `Glazier.spoon` from this repository to `~/.hammerspoon/Spoons`. Then add this to your `init.lua`:
 
 ``` lua
-hs.loadSpoon("MiroWindowsManager")
+hs.loadSpoon("Glazier")
 local hyper = {"ctrl", "alt", "cmd"}
-spoon.MiroWindowsManager:bindHotkeys({
+spoon.Glazier:bindHotkeys({
   up          = {hyper, "up"},
   down        = {hyper, "down"},
   left        = {hyper, "left"},
   right       = {hyper, "right"},
-  fullWidth   = {hyper, "left+right"},
-  fullHeight  = {hyper, "up+down"},
   fullscreen  = {hyper, "f"},
   center      = {hyper, "c"},
   move        = {hyper, "v"},
   resize      = {hyper, "d"},
+})
+spoon.Glazier:bindChords({
+  fullWidth   = {hyper, "left", "right"},
+  fullHeight  = {hyper, "up", "down"},
 })
 hs.window.animationDuration = 0.3
 ```
@@ -29,6 +31,8 @@ hs.window.animationDuration = 0.3
 ## Shortcuts
 
 With the snippet above, every shortcut starts with `hyper`: `ctrl` + `alt` + `cmd`.
+
+Every action can be bound either to a hotkey with `bindHotkeys`, or to a chord of two keys pressed together with `bindChords`. A key used in a chord acts when it's released rather than when it's pressed, and only if it wasn't part of a chord, so a chord doesn't also trigger its keys' own actions.
 
 ### Edges and sizes
 
@@ -42,8 +46,6 @@ Press two perpendicular arrows, such as `hyper` + `up` + `right`. Each axis cycl
 
  - `fullWidth`: `hyper` + `left` + `right`
  - `fullHeight`: `hyper` + `up` + `down`
-
-So that a chord doesn't also trigger its keys' own actions, keys used in chords act when released rather than when pressed, and only if they weren't part of a chord.
 
 ### Fullscreen
 
@@ -63,7 +65,7 @@ Hold `hyper` + `d` and tap an arrow to resize the window by `resizeStep` points:
 
 ## Settings
 
-Set these on `spoon.MiroWindowsManager`:
+Set these on `spoon.Glazier`:
 
  - `sizes`: fractions of the screen to cycle through at an edge, such as `{1/2, 1/3, 2/3}`
  - `fullScreenSizes`: fractions of the screen for the fullscreen cycle, such as `{1, 1/2, 'c'}`

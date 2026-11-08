@@ -267,19 +267,6 @@ describe("placeConstrained", function()
   end)
 end)
 
-describe("parseChord", function()
-  it("splits two keys", function()
-    assert.same({ 'h', 'l' }, { core.parseChord('h+l') })
-    assert.same({ 'left', 'right' }, { core.parseChord('left+right') })
-  end)
-
-  it("rejects anything that isn't exactly two keys", function()
-    for _, chord in ipairs({ 'h', 'h+', '+l', 'h+j+l' }) do
-      assert.is_nil(core.parseChord(chord))
-    end
-  end)
-end)
-
 describe("pressKey", function()
   local height = { keys = { 'k', 'j' } }
   local width = { keys = { 'h', 'l' } }
@@ -307,19 +294,19 @@ describe("pressKey", function()
   it("counts a release as a tap only if the press completed no chord", function()
     local held = {}
     core.pressKey(held, 'k', chords)
-    assert.is_true(core.releaseKey(held, 'k'))
+    assert.is_true((core.releaseKey(held, 'k')))
     core.pressKey(held, 'k', chords)
     core.pressKey(held, 'j', chords)
-    assert.is_false(core.releaseKey(held, 'k'))
-    assert.is_false(core.releaseKey(held, 'j'))
+    assert.is_false((core.releaseKey(held, 'k')))
+    assert.is_false((core.releaseKey(held, 'j')))
   end)
 
   it("counts both keys of a corner as taps", function()
     local held = {}
     core.pressKey(held, 'k', chords)
     core.pressKey(held, 'l', chords)
-    assert.is_true(core.releaseKey(held, 'l'))
-    assert.is_true(core.releaseKey(held, 'k'))
+    assert.is_true((core.releaseKey(held, 'l')))
+    assert.is_true((core.releaseKey(held, 'k')))
   end)
 
   it("repeats a chord when one key is pressed again while the other is held", function()
@@ -335,5 +322,15 @@ describe("pressKey", function()
     core.pressKey(held, 'j', chords)
     core.releaseKey(held, 'j')
     assert.is_nil(core.pressKey(held, 'k', chords))
+  end)
+  it("ends a chord when either key is released, once", function()
+    local held = {}
+    core.pressKey(held, 'h', chords)
+    core.pressKey(held, 'l', chords)
+    local _, ended = core.releaseKey(held, 'l')
+    assert.equal(width, ended)
+    local tapped, endedAgain = core.releaseKey(held, 'h')
+    assert.is_false(tapped)
+    assert.is_nil(endedAgain)
   end)
 end)

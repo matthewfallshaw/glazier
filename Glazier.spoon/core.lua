@@ -256,20 +256,14 @@ function M.forgetPlacement(memory)
   return { cycle = {}, restore = memory.restore }
 end
 
---- The two key names in a chord written as 'key1+key2', or nil if it isn't one.
-function M.parseChord(chord)
-  return chord:match('^([^+]+)%+([^+]+)$')
-end
-
 --- Record a key press in `held`, and return the chord it completes, if any. A chord is a table
---- whose `keys` are a pair of key names. Completing a chord marks both its keys as used, so
---- releasing them doesn't count as a tap.
+--- whose `keys` are a pair of key names. Both keys then belong to the chord until one is released.
 function M.pressKey(held, key, chords)
   for _, chord in ipairs(chords) do
     local a, b = chord.keys[1], chord.keys[2]
     local partner = (key == a and b) or (key == b and a)
     if partner and held[partner] then
-      held[a], held[b] = 'used', 'used'
+      held[a], held[b] = chord, chord
       return chord
     end
   end
@@ -277,12 +271,18 @@ function M.pressKey(held, key, chords)
   return nil
 end
 
---- Record a key release in `held`, and return whether the press was a tap: a press that
---- completed no chord.
+--- Record a key release in `held`. Returns whether the press was a tap (it completed no chord),
+--- and the chord the release ends, if any.
 function M.releaseKey(held, key)
-  local tapped = held[key] == 'tapped'
+  local state = held[key]
   held[key] = nil
-  return tapped
+  if type(state) == 'table' then
+    for _, other in ipairs(state.keys) do
+      if held[other] == state then held[other] = 'used' end
+    end
+    return false, state
+  end
+  return state == 'tapped', nil
 end
 
 return M
