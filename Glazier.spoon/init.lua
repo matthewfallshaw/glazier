@@ -32,7 +32,7 @@ obj.__index = obj
 obj.name = "Glazier"
 obj.version = "2.0"
 obj.author = "Miro Mannino <miro.mannino@gmail.com>, Matt Fallshaw"
-obj.homepage = "https://github.com/matthewfallshaw/miro-windows-manager"
+obj.homepage = "https://github.com/matthewfallshaw/glazier"
 obj.license = "MIT - https://opensource.org/licenses/MIT"
 
 --- Glazier.logger
@@ -298,6 +298,7 @@ local function rebind(self)
     table.insert(self.hotkeys, hs.hotkey.bind(key.mods, key.key,
       function()
         local chord = core.pressKey(held, id, chords)
+        obj.logger.d('press', id, chord and 'chord' or '')
         if chord then
           chord.press()
         else
@@ -307,6 +308,7 @@ local function rebind(self)
       end,
       function()
         local tapped, chord = core.releaseKey(held, id)
+        obj.logger.d('release', id, tapped and 'tap' or '', chord and 'chord end' or '')
         if chord and chord.release then chord.release() end
         if key.release then key.release() end
         if tapped and key.tap and inChord[id] then key.tap() end

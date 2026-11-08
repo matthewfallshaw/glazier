@@ -6,7 +6,7 @@ Glazier began as a fork of [miro-windows-manager](https://github.com/miromannino
 
 ## How to install
 
-Download `Glazier.spoon.zip` from the [latest release](https://github.com/matthewfallshaw/miro-windows-manager/releases/latest) and double-click it, or copy `Glazier.spoon` from this repository to `~/.hammerspoon/Spoons`. Then add this to your `init.lua`:
+Download `Glazier.spoon.zip` from the [latest release](https://github.com/matthewfallshaw/glazier/releases/latest) and double-click it, or copy `Glazier.spoon` from this repository to `~/.hammerspoon/Spoons`. Then add this to your `init.lua`:
 
 ``` lua
 hs.loadSpoon("Glazier")
