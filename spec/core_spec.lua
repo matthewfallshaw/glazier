@@ -304,11 +304,36 @@ describe("pressKey", function()
     assert.is_nil(core.pressKey(held, 'l', chords))
   end)
 
-  it("doesn't count a key that completed a chord as held", function()
+  it("counts a release as a tap only if the press completed no chord", function()
+    local held = {}
+    core.pressKey(held, 'k', chords)
+    assert.is_true(core.releaseKey(held, 'k'))
+    core.pressKey(held, 'k', chords)
+    core.pressKey(held, 'j', chords)
+    assert.is_false(core.releaseKey(held, 'k'))
+    assert.is_false(core.releaseKey(held, 'j'))
+  end)
+
+  it("counts both keys of a corner as taps", function()
+    local held = {}
+    core.pressKey(held, 'k', chords)
+    core.pressKey(held, 'l', chords)
+    assert.is_true(core.releaseKey(held, 'l'))
+    assert.is_true(core.releaseKey(held, 'k'))
+  end)
+
+  it("repeats a chord when one key is pressed again while the other is held", function()
     local held = {}
     core.pressKey(held, 'j', chords)
-    core.pressKey(held, 'k', chords)  -- completes the chord, and stays physically down
-    held.j = nil                      -- j released
-    assert.is_nil(core.pressKey(held, 'j', chords))
+    core.pressKey(held, 'k', chords)
+    core.releaseKey(held, 'j')
+    assert.equal(height, core.pressKey(held, 'j', chords))
+  end)
+
+  it("forgets a key once released", function()
+    local held = {}
+    core.pressKey(held, 'j', chords)
+    core.releaseKey(held, 'j')
+    assert.is_nil(core.pressKey(held, 'k', chords))
   end)
 end)

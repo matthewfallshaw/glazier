@@ -261,16 +261,28 @@ function M.parseChord(chord)
   return chord:match('^([^+]+)%+([^+]+)$')
 end
 
---- Record a key press, updating `held`, and return the chord it completes, if any. A chord is a
---- table whose `keys` are a pair of key names. A key that completes a chord doesn't count as held,
---- so it can't complete another chord with a key pressed after the first is released.
+--- Record a key press in `held`, and return the chord it completes, if any. A chord is a table
+--- whose `keys` are a pair of key names. Completing a chord marks both its keys as used, so
+--- releasing them doesn't count as a tap.
 function M.pressKey(held, key, chords)
   for _, chord in ipairs(chords) do
     local a, b = chord.keys[1], chord.keys[2]
-    if (key == a and held[b]) or (key == b and held[a]) then return chord end
+    local partner = (key == a and b) or (key == b and a)
+    if partner and held[partner] then
+      held[a], held[b] = 'used', 'used'
+      return chord
+    end
   end
-  held[key] = true
+  held[key] = 'tapped'
   return nil
+end
+
+--- Record a key release in `held`, and return whether the press was a tap: a press that
+--- completed no chord.
+function M.releaseKey(held, key)
+  local tapped = held[key] == 'tapped'
+  held[key] = nil
+  return tapped
 end
 
 return M

@@ -254,7 +254,7 @@ end
 ---
 --- Notes:
 ---  * Move and resize use the same keys as the directions, with the modifiers of their own hotkey.
----  * A chord's keys can also be hotkeys for other actions. The first key's action runs when it's pressed, and completing the chord doesn't undo it. Pairing left with right for `fullWidth`, or up with down for `fullHeight`, overwrites that action's effect because both set the same axis; other pairings keep it.
+---  * A chord's keys can also be hotkeys for other actions. Those actions run when the key is released, and not at all if it was part of a chord. Other actions run when their key is pressed.
 function obj:bindHotkeys(mapping)
   local bindings = {}  -- key id -> { mods, key, action }
   local function bindingFor(mods, key)
@@ -293,18 +293,27 @@ function obj:bindHotkeys(mapping)
     end
   end
 
+  -- A key in a chord acts when released, and only if it completed no chord while down.
+  local inChord = {}
+  for _, chord in ipairs(chords) do
+    inChord[chord.keys[1]], inChord[chord.keys[2]] = true, true
+  end
   local held = {}
   for id, binding in pairs(bindings) do
+    local action = binding.action or function() end
+    local deferred = inChord[id]
     table.insert(self.hotkeys, hs.hotkey.bind(binding.mods, binding.key,
       function()
         local chord = core.pressKey(held, id, chords)
         if chord then
           chord.action()
-        elseif binding.action then
-          binding.action()
+        elseif not deferred then
+          action()
         end
       end,
-      function() held[id] = nil end))
+      function()
+        if core.releaseKey(held, id) and deferred then action() end
+      end))
   end
 
   if mapping.move then

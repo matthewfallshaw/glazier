@@ -43,7 +43,7 @@ Press two perpendicular arrows, such as `hyper` + `up` + `right`. Each axis cycl
  - `fullWidth`: `hyper` + `left` + `right`
  - `fullHeight`: `hyper` + `up` + `down`
 
-The first key's own action runs when it's pressed, and completing the chord doesn't undo it. With these pairings the chord overwrites that action's effect, because both set the same axis. Pairing keys on different axes would keep it.
+So that a chord doesn't also trigger its keys' own actions, keys used in chords act when released rather than when pressed, and only if they weren't part of a chord.
 
 ### Fullscreen
 
